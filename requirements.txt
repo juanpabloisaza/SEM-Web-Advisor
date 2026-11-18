@@ -1,22 +1,25 @@
+# Versiones probadas con Python 3.12 en Windows (18/11/2026)
+
 # Fase 2 - Lógica difusa
-numpy
-scipy
-networkx
-scikit-fuzzy
-matplotlib
+numpy==2.5.5
+scipy==1.18.1
+networkx==3.7
+scikit-fuzzy==0.5.0
+matplotlib==3.11.2
 
 # Fase 1 - Ontología / SPARQL
-rdflib
+rdflib==7.6.0
 
-# Fase 3 - Multiagentes
-spade
+# Fase 3 - Multiagentes (incluye servidor XMPP embebido)
+spade==4.1.4
+greenlet==3.5.6  # requerido por SPADE en Windows, no se instala solo
 
 # Analista (scraping)
-requests
-beautifulsoup4
+requests==2.34.2
+beautifulsoup4==4.15.0
 
 # Fase 4 - Persistencia
-pymongo
+pymongo==4.20.0
 
 # Fase 5 - Interfaz
-flask
+flask==3.1.3

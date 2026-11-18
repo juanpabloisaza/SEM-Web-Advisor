@@ -33,17 +33,28 @@ Dashboard (Flask) ──URL──► [Agente Analista] ──ACL──► [Agent
 
 - Python 3.12
 - MongoDB Community Server (local, puerto 27017)
-- Protégé (para abrir/editar la ontología)
+- Protégé 5.6 (para abrir/editar la ontología)
+
+En Windows se pueden instalar con `winget`:
+
+```bash
+winget install -e --id Python.Python.3.12
+winget install -e --id MongoDB.Server
+winget install -e --id MongoDB.Compass.Full
+winget install -e --id Stanford.Protege
+```
 
 ## Instalación
 
 ```bash
-git clone <url-del-repo>
+git clone https://github.com/juanpabloisaza/SEM-Web-Advisor.git
 cd SEM-Web-Advisor
-python -m venv .venv
+py -3.12 -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
+
+> SPADE trae su propio servidor XMPP embebido, no hay que instalar Openfire ni Prosody.
 
 ## Ejecución
 
