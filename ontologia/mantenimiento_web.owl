@@ -175,9 +175,43 @@
 
     <owl:DatatypeProperty rdf:about="&mw;prioridad">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:domain rdf:resource="&mw;Recomendacion"/>
         <rdfs:range rdf:resource="&xsd;string"/>
         <rdfs:label xml:lang="es">prioridad</rdfs:label>
+        <rdfs:comment xml:lang="es">Alta, Media o Baja. Se usa en recomendaciones y en el resultado de un informe.</rdfs:comment>
+    </owl:DatatypeProperty>
+
+    <!-- Propiedades usadas por los informes JSON-LD que se guardan en MongoDB (Fase 4) -->
+    <owl:ObjectProperty rdf:about="&mw;resultado">
+        <rdfs:domain rdf:resource="&mw;InformeAuditoria"/>
+        <rdfs:label xml:lang="es">resultado</rdfs:label>
+        <rdfs:comment xml:lang="es">Resumen del diagnóstico: estado en texto, prioridad y áreas afectadas.</rdfs:comment>
+    </owl:ObjectProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;estadoTexto">
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+        <rdfs:label xml:lang="es">estado en texto</rdfs:label>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;puntajeDifuso">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;InformeAuditoria"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+        <rdfs:label xml:lang="es">puntaje difuso</rdfs:label>
+        <rdfs:comment xml:lang="es">Necesidad de mantenimiento de 0 a 100 calculada por la lógica difusa.</rdfs:comment>
+    </owl:DatatypeProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;tieneNivelDifuso">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;InformeAuditoria"/>
+        <rdfs:range rdf:resource="&mw;NivelMantenimiento"/>
+        <rdfs:label xml:lang="es">tiene nivel difuso</rdfs:label>
+        <rdfs:comment xml:lang="es">Veredicto original de la lógica difusa, antes del ajuste semántico del Agente Experto.</rdfs:comment>
+    </owl:ObjectProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;detalle">
+        <rdfs:domain rdf:resource="&mw;InformeAuditoria"/>
+        <rdfs:label xml:lang="es">detalle</rdfs:label>
+        <rdfs:comment xml:lang="es">Datos técnicos completos (métricas, reglas activadas) como literal rdf:JSON.</rdfs:comment>
     </owl:DatatypeProperty>
 
     <owl:DatatypeProperty rdf:about="&mw;explicacion">

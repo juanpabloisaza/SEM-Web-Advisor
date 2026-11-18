@@ -109,8 +109,21 @@ class SistemaMultiagente:
             await agente.stop()
 
 
+def almacenamiento_por_defecto():
+    """MongoDB (JSON-LD) si está disponible; si no, memoria con un aviso."""
+    from persistencia.repositorio import RepositorioInformes, disponible
+
+    if disponible():
+        repo = RepositorioInformes()
+        repo.crear_indices()
+        return repo.guardar, f"MongoDB ({repo.col.full_name})"
+    return guardar_en_memoria, "memoria (MongoDB no disponible: los informes no se conservarán)"
+
+
 async def _main(urls):
-    sistema = SistemaMultiagente()
+    guardar, destino = almacenamiento_por_defecto()
+    print("Informes se guardan en:", destino)
+    sistema = SistemaMultiagente(guardar=guardar)
     await sistema.iniciar()
     try:
         for url in urls:
@@ -121,6 +134,7 @@ async def _main(urls):
                 print("No se pudo analizar:", e)
                 continue
             d = respuesta["informe"]["diagnostico"]
+            print(f"Informe id: {respuesta['id']}")
             print(f"Veredicto: {d['nivel']} ({d['puntaje']}/100) -> estado {d['estado']}")
             print(d["explicacion_difusa"])
             print(d["mensaje"])
