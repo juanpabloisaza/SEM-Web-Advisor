@@ -1,0 +1,22 @@
+# Fase 2 - Lógica difusa
+numpy
+scipy
+networkx
+scikit-fuzzy
+matplotlib
+
+# Fase 1 - Ontología / SPARQL
+rdflib
+
+# Fase 3 - Multiagentes
+spade
+
+# Analista (scraping)
+requests
+beautifulsoup4
+
+# Fase 4 - Persistencia
+pymongo
+
+# Fase 5 - Interfaz
+flask

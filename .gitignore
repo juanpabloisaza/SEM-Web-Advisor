@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Configuración local y secretos
+.env
+*.env
+config.local.*
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Protégé
+catalog-v001.xml
+
+# Salidas temporales
+*.log
