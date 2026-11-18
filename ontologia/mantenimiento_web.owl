@@ -1,0 +1,808 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SEM-Web-Advisor - Ontologia de Mantenimiento Web
+  Fase 1 del Proyecto Final - Web Semantica y Agentes Inteligentes (ING01243)
+
+  Vocabulario que usan los agentes para:
+    1. saber que PROBLEMAS puede tener un sitio y como detectarlos (metrica + umbral),
+    2. que BUENA PRACTICA (SEO, Accesibilidad, Rendimiento) incumple cada problema,
+    3. que RECOMENDACION dar (accion + explicacion en lenguaje sencillo),
+    4. como traducir el NIVEL DE MANTENIMIENTO de la logica difusa a un ESTADO DEL SITIO.
+
+  Abrir en Protege 5.6 y ejecutar el razonador HermiT (Reasoner > HermiT > Start reasoner)
+  para ver las clases definidas (RecomendacionSEO, SitioCritico, ...) inferidas.
+-->
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl    "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd    "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs   "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf    "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY schema "http://schema.org/" >
+    <!ENTITY mw     "http://www.semanticweb.org/sem-web-advisor/mantenimiento_web#" >
+]>
+<rdf:RDF xmlns="http://www.semanticweb.org/sem-web-advisor/mantenimiento_web#"
+     xml:base="http://www.semanticweb.org/sem-web-advisor/mantenimiento_web"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:schema="http://schema.org/"
+     xmlns:mw="http://www.semanticweb.org/sem-web-advisor/mantenimiento_web#">
+
+    <owl:Ontology rdf:about="http://www.semanticweb.org/sem-web-advisor/mantenimiento_web">
+        <rdfs:label xml:lang="es">Ontología de Mantenimiento Web (SEM-Web-Advisor)</rdfs:label>
+        <rdfs:comment xml:lang="es">Vocabulario para diagnosticar el mantenimiento de un sitio web en SEO, accesibilidad y rendimiento, y vincular cada problema detectado con una recomendación comprensible para usuarios no técnicos.</rdfs:comment>
+        <owl:versionInfo>1.0</owl:versionInfo>
+    </owl:Ontology>
+
+
+    <!-- ================================================================== -->
+    <!--  PROPIEDADES DE OBJETO                                              -->
+    <!-- ================================================================== -->
+
+    <!-- Propiedad pedida por el enunciado: un sitio (o informe) tiene un estado -->
+    <owl:ObjectProperty rdf:about="&mw;tieneEstado">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;SitioWeb"/>
+        <rdfs:range rdf:resource="&mw;EstadoSitio"/>
+        <rdfs:label xml:lang="es">tiene estado</rdfs:label>
+        <rdfs:comment xml:lang="es">Estado general del sitio después del diagnóstico. Un sitio tiene un único estado (propiedad funcional).</rdfs:comment>
+    </owl:ObjectProperty>
+
+    <!-- Propiedad pedida por el enunciado: una recomendacion sugiere una accion -->
+    <owl:ObjectProperty rdf:about="&mw;sugiereAccion">
+        <rdfs:domain rdf:resource="&mw;Recomendacion"/>
+        <rdfs:range rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">sugiere acción</rdfs:label>
+        <rdfs:comment xml:lang="es">Acción concreta (la solución) que propone una recomendación.</rdfs:comment>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;atiendeProblema">
+        <owl:inverseOf rdf:resource="&mw;seAtiendeCon"/>
+        <rdfs:domain rdf:resource="&mw;Recomendacion"/>
+        <rdfs:range rdf:resource="&mw;Problema"/>
+        <rdfs:label xml:lang="es">atiende problema</rdfs:label>
+        <rdfs:comment xml:lang="es">Problema (error) que la recomendación resuelve. Junto con sugiereAccion, hace que la Recomendación vincule un error con una solución.</rdfs:comment>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;seAtiendeCon">
+        <rdfs:domain rdf:resource="&mw;Problema"/>
+        <rdfs:range rdf:resource="&mw;Recomendacion"/>
+        <rdfs:label xml:lang="es">se atiende con</rdfs:label>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;aplicaPractica">
+        <rdfs:domain rdf:resource="&mw;Recomendacion"/>
+        <rdfs:range rdf:resource="&mw;BuenasPracticas"/>
+        <rdfs:label xml:lang="es">aplica práctica</rdfs:label>
+        <rdfs:comment xml:lang="es">Buena práctica que se cumple al seguir la recomendación.</rdfs:comment>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;incumplePractica">
+        <owl:inverseOf rdf:resource="&mw;esIncumplidaPor"/>
+        <rdfs:domain rdf:resource="&mw;Problema"/>
+        <rdfs:range rdf:resource="&mw;BuenasPracticas"/>
+        <rdfs:label xml:lang="es">incumple práctica</rdfs:label>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;esIncumplidaPor">
+        <rdfs:domain rdf:resource="&mw;BuenasPracticas"/>
+        <rdfs:range rdf:resource="&mw;Problema"/>
+        <rdfs:label xml:lang="es">es incumplida por</rdfs:label>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;presentaProblema">
+        <rdfs:domain rdf:resource="&mw;SitioWeb"/>
+        <rdfs:range rdf:resource="&mw;Problema"/>
+        <rdfs:label xml:lang="es">presenta problema</rdfs:label>
+    </owl:ObjectProperty>
+
+    <!-- Cadena de propiedades: si un sitio presenta un problema que incumple una practica,
+         el razonador infiere que el sitio incumple esa practica. -->
+    <owl:ObjectProperty rdf:about="&mw;sitioIncumplePractica">
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mw;presentaProblema"/>
+            <rdf:Description rdf:about="&mw;incumplePractica"/>
+        </owl:propertyChainAxiom>
+        <rdfs:domain rdf:resource="&mw;SitioWeb"/>
+        <rdfs:range rdf:resource="&mw;BuenasPracticas"/>
+        <rdfs:label xml:lang="es">sitio incumple práctica</rdfs:label>
+        <rdfs:comment xml:lang="es">Inferida: presentaProblema o incumplePractica.</rdfs:comment>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;correspondeAEstado">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;NivelMantenimiento"/>
+        <rdfs:range rdf:resource="&mw;EstadoSitio"/>
+        <rdfs:label xml:lang="es">corresponde a estado</rdfs:label>
+        <rdfs:comment xml:lang="es">Traduce la salida de la lógica difusa (nivel de mantenimiento) al estado del sitio.</rdfs:comment>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;analizaSitio">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;InformeAuditoria"/>
+        <rdfs:range rdf:resource="&mw;SitioWeb"/>
+        <rdfs:label xml:lang="es">analiza sitio</rdfs:label>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;tieneNivel">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;InformeAuditoria"/>
+        <rdfs:range rdf:resource="&mw;NivelMantenimiento"/>
+        <rdfs:label xml:lang="es">tiene nivel</rdfs:label>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="&mw;incluyeRecomendacion">
+        <rdfs:domain rdf:resource="&mw;InformeAuditoria"/>
+        <rdfs:range rdf:resource="&mw;Recomendacion"/>
+        <rdfs:label xml:lang="es">incluye recomendación</rdfs:label>
+    </owl:ObjectProperty>
+
+
+    <!-- ================================================================== -->
+    <!--  PROPIEDADES DE DATOS                                               -->
+    <!-- ================================================================== -->
+
+    <owl:DatatypeProperty rdf:about="&mw;metrica">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;Problema"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:label xml:lang="es">métrica</rdfs:label>
+        <rdfs:comment xml:lang="es">Nombre del dato que mide el Agente Analista para detectar el problema.</rdfs:comment>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;umbral">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;Problema"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+        <rdfs:label xml:lang="es">umbral</rdfs:label>
+        <rdfs:comment xml:lang="es">El problema existe cuando el valor medido es MAYOR que este umbral.</rdfs:comment>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;unidad">
+        <rdfs:domain rdf:resource="&mw;Problema"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:label xml:lang="es">unidad</rdfs:label>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;gravedad">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;Problema"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+        <rdfs:label xml:lang="es">gravedad</rdfs:label>
+        <rdfs:comment xml:lang="es">1 = leve, 2 = moderada, 3 = grave.</rdfs:comment>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;prioridad">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&mw;Recomendacion"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:label xml:lang="es">prioridad</rdfs:label>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;explicacion">
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+        <rdfs:label xml:lang="es">explicación</rdfs:label>
+        <rdfs:comment xml:lang="es">Por qué importa, en lenguaje sencillo para alguien que no sabe de programación. Es el texto que muestra el Dashboard.</rdfs:comment>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;pasosSolucion">
+        <rdfs:domain rdf:resource="&mw;Accion"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+        <rdfs:label xml:lang="es">pasos de solución</rdfs:label>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;mensaje">
+        <rdfs:domain rdf:resource="&mw;NivelMantenimiento"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+        <rdfs:label xml:lang="es">mensaje</rdfs:label>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="&mw;url">
+        <rdfs:domain rdf:resource="&mw;SitioWeb"/>
+        <rdfs:range rdf:resource="&xsd;anyURI"/>
+        <rdfs:label xml:lang="es">url</rdfs:label>
+    </owl:DatatypeProperty>
+
+
+    <!-- ================================================================== -->
+    <!--  CLASES                                                             -->
+    <!-- ================================================================== -->
+
+    <!-- BuenasPracticas y sus subclases (pedidas por el enunciado) -->
+    <owl:Class rdf:about="&mw;BuenasPracticas">
+        <rdfs:label xml:lang="es">Buenas Prácticas</rdfs:label>
+        <rdfs:comment xml:lang="es">Pautas que un sitio web bien mantenido debe cumplir.</rdfs:comment>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;SEO">
+        <rdfs:subClassOf rdf:resource="&mw;BuenasPracticas"/>
+        <rdfs:label xml:lang="es">SEO</rdfs:label>
+        <rdfs:comment xml:lang="es">Prácticas para que los buscadores (Google, Bing) encuentren y entiendan el sitio.</rdfs:comment>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;Accesibilidad">
+        <rdfs:subClassOf rdf:resource="&mw;BuenasPracticas"/>
+        <rdfs:label xml:lang="es">Accesibilidad</rdfs:label>
+        <rdfs:comment xml:lang="es">Prácticas para que cualquier persona, incluidas personas con discapacidad, pueda usar el sitio (pautas WCAG).</rdfs:comment>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;Rendimiento">
+        <rdfs:subClassOf rdf:resource="&mw;BuenasPracticas"/>
+        <rdfs:label xml:lang="es">Rendimiento</rdfs:label>
+        <rdfs:comment xml:lang="es">Prácticas para que el sitio cargue rápido y consuma pocos recursos.</rdfs:comment>
+    </owl:Class>
+
+    <!-- EstadoSitio: clase enumerada, solo admite sus 3 instancias -->
+    <owl:Class rdf:about="&mw;EstadoSitio">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:oneOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&mw;Critico"/>
+                    <rdf:Description rdf:about="&mw;Aceptable"/>
+                    <rdf:Description rdf:about="&mw;Excelente"/>
+                </owl:oneOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:label xml:lang="es">Estado del Sitio</rdfs:label>
+    </owl:Class>
+
+    <!-- Recomendacion: vincula un error (Problema) con una solucion (Accion) -->
+    <owl:Class rdf:about="&mw;Recomendacion">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&mw;atiendeProblema"/>
+                <owl:someValuesFrom rdf:resource="&mw;Problema"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&mw;sugiereAccion"/>
+                <owl:someValuesFrom rdf:resource="&mw;Accion"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&mw;aplicaPractica"/>
+                <owl:someValuesFrom rdf:resource="&mw;BuenasPracticas"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label xml:lang="es">Recomendación</rdfs:label>
+        <rdfs:comment xml:lang="es">Toda recomendación atiende al menos un problema, sugiere al menos una acción y aplica al menos una buena práctica.</rdfs:comment>
+    </owl:Class>
+
+    <!-- Clases definidas: el razonador clasifica las recomendaciones por area -->
+    <owl:Class rdf:about="&mw;RecomendacionSEO">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&mw;Recomendacion"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&mw;aplicaPractica"/>
+                        <owl:someValuesFrom rdf:resource="&mw;SEO"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:label xml:lang="es">Recomendación de SEO</rdfs:label>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;RecomendacionAccesibilidad">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&mw;Recomendacion"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&mw;aplicaPractica"/>
+                        <owl:someValuesFrom rdf:resource="&mw;Accesibilidad"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:label xml:lang="es">Recomendación de Accesibilidad</rdfs:label>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;RecomendacionRendimiento">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&mw;Recomendacion"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&mw;aplicaPractica"/>
+                        <owl:someValuesFrom rdf:resource="&mw;Rendimiento"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:label xml:lang="es">Recomendación de Rendimiento</rdfs:label>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;Problema">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&mw;incumplePractica"/>
+                <owl:someValuesFrom rdf:resource="&mw;BuenasPracticas"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label xml:lang="es">Problema</rdfs:label>
+        <rdfs:comment xml:lang="es">Error o deficiencia que el Agente Analista puede detectar en un sitio.</rdfs:comment>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;Accion">
+        <rdfs:label xml:lang="es">Acción</rdfs:label>
+        <rdfs:comment xml:lang="es">Solución concreta que el responsable del sitio puede aplicar.</rdfs:comment>
+    </owl:Class>
+
+    <!-- NivelMantenimiento: los 3 conjuntos de salida de la logica difusa -->
+    <owl:Class rdf:about="&mw;NivelMantenimiento">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:oneOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&mw;Urgente"/>
+                    <rdf:Description rdf:about="&mw;Preventivo"/>
+                    <rdf:Description rdf:about="&mw;AlDia"/>
+                </owl:oneOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:label xml:lang="es">Nivel de Mantenimiento</rdfs:label>
+        <rdfs:comment xml:lang="es">Veredicto del motor de lógica difusa.</rdfs:comment>
+    </owl:Class>
+
+    <!-- Alineacion con el vocabulario controlado schema.org -->
+    <owl:Class rdf:about="&mw;SitioWeb">
+        <rdfs:subClassOf rdf:resource="&schema;WebSite"/>
+        <rdfs:label xml:lang="es">Sitio Web</rdfs:label>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;InformeAuditoria">
+        <rdfs:subClassOf rdf:resource="&schema;Report"/>
+        <rdfs:label xml:lang="es">Informe de Auditoría</rdfs:label>
+        <rdfs:comment xml:lang="es">Resultado de un análisis; es lo que el Agente Notificador guarda en MongoDB como JSON-LD.</rdfs:comment>
+    </owl:Class>
+
+    <owl:Class rdf:about="&schema;WebSite"/>
+    <owl:Class rdf:about="&schema;Report"/>
+
+    <!-- Clases definidas por estado: el razonador clasifica los sitios -->
+    <owl:Class rdf:about="&mw;SitioCritico">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&mw;SitioWeb"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&mw;tieneEstado"/>
+                        <owl:hasValue rdf:resource="&mw;Critico"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:label xml:lang="es">Sitio en estado crítico</rdfs:label>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;SitioAceptable">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&mw;SitioWeb"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&mw;tieneEstado"/>
+                        <owl:hasValue rdf:resource="&mw;Aceptable"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:label xml:lang="es">Sitio en estado aceptable</rdfs:label>
+    </owl:Class>
+
+    <owl:Class rdf:about="&mw;SitioExcelente">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&mw;SitioWeb"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&mw;tieneEstado"/>
+                        <owl:hasValue rdf:resource="&mw;Excelente"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:label xml:lang="es">Sitio en estado excelente</rdfs:label>
+    </owl:Class>
+
+    <!-- Las clases principales son disjuntas entre si -->
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mw;BuenasPracticas"/>
+            <rdf:Description rdf:about="&mw;EstadoSitio"/>
+            <rdf:Description rdf:about="&mw;Recomendacion"/>
+            <rdf:Description rdf:about="&mw;Problema"/>
+            <rdf:Description rdf:about="&mw;Accion"/>
+            <rdf:Description rdf:about="&mw;NivelMantenimiento"/>
+            <rdf:Description rdf:about="&mw;SitioWeb"/>
+            <rdf:Description rdf:about="&mw;InformeAuditoria"/>
+        </owl:members>
+    </rdf:Description>
+
+
+    <!-- ================================================================== -->
+    <!--  INDIVIDUOS: ESTADOS Y NIVELES                                      -->
+    <!-- ================================================================== -->
+
+    <owl:NamedIndividual rdf:about="&mw;Critico">
+        <rdf:type rdf:resource="&mw;EstadoSitio"/>
+        <rdfs:label xml:lang="es">Crítico</rdfs:label>
+        <explicacion xml:lang="es">El sitio tiene fallas que afectan a los visitantes y a su posición en buscadores. Hay que corregirlas cuanto antes.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;Aceptable">
+        <rdf:type rdf:resource="&mw;EstadoSitio"/>
+        <rdfs:label xml:lang="es">Aceptable</rdfs:label>
+        <explicacion xml:lang="es">El sitio funciona, pero tiene detalles que conviene mejorar para que no se conviertan en problemas mayores.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;Excelente">
+        <rdf:type rdf:resource="&mw;EstadoSitio"/>
+        <rdfs:label xml:lang="es">Excelente</rdfs:label>
+        <explicacion xml:lang="es">El sitio cumple las buenas prácticas revisadas. Solo requiere revisiones periódicas.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:AllDifferent>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mw;Critico"/>
+            <rdf:Description rdf:about="&mw;Aceptable"/>
+            <rdf:Description rdf:about="&mw;Excelente"/>
+        </owl:distinctMembers>
+    </owl:AllDifferent>
+
+    <owl:NamedIndividual rdf:about="&mw;Urgente">
+        <rdf:type rdf:resource="&mw;NivelMantenimiento"/>
+        <correspondeAEstado rdf:resource="&mw;Critico"/>
+        <rdfs:label xml:lang="es">Urgente</rdfs:label>
+        <mensaje xml:lang="es">Su sitio necesita mantenimiento urgente: es lento y/o tiene muchos errores. Atienda primero las recomendaciones de prioridad Alta.</mensaje>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;Preventivo">
+        <rdf:type rdf:resource="&mw;NivelMantenimiento"/>
+        <correspondeAEstado rdf:resource="&mw;Aceptable"/>
+        <rdfs:label xml:lang="es">Preventivo</rdfs:label>
+        <mensaje xml:lang="es">Su sitio está funcionando, pero conviene hacer un mantenimiento preventivo para evitar problemas a futuro.</mensaje>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;AlDia">
+        <rdf:type rdf:resource="&mw;NivelMantenimiento"/>
+        <correspondeAEstado rdf:resource="&mw;Excelente"/>
+        <rdfs:label xml:lang="es">Al día</rdfs:label>
+        <mensaje xml:lang="es">Su sitio está al día. Siga revisándolo periódicamente.</mensaje>
+    </owl:NamedIndividual>
+
+    <owl:AllDifferent>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mw;Urgente"/>
+            <rdf:Description rdf:about="&mw;Preventivo"/>
+            <rdf:Description rdf:about="&mw;AlDia"/>
+        </owl:distinctMembers>
+    </owl:AllDifferent>
+
+
+    <!-- ================================================================== -->
+    <!--  INDIVIDUOS: BUENAS PRACTICAS                                       -->
+    <!-- ================================================================== -->
+
+    <owl:NamedIndividual rdf:about="&mw;PracticaTituloDescriptivo">
+        <rdf:type rdf:resource="&mw;SEO"/>
+        <rdfs:label xml:lang="es">Título de página descriptivo</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;PracticaMetaDescripcion">
+        <rdf:type rdf:resource="&mw;SEO"/>
+        <rdfs:label xml:lang="es">Meta descripción</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;PracticaEncabezadoPrincipal">
+        <rdf:type rdf:resource="&mw;SEO"/>
+        <rdfs:label xml:lang="es">Un único encabezado principal (h1)</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;PracticaTextoAlternativo">
+        <rdf:type rdf:resource="&mw;Accesibilidad"/>
+        <rdfs:label xml:lang="es">Texto alternativo en imágenes</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;PracticaIdiomaDeclarado">
+        <rdf:type rdf:resource="&mw;Accesibilidad"/>
+        <rdfs:label xml:lang="es">Idioma de la página declarado</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;PracticaEnlacesDescriptivos">
+        <rdf:type rdf:resource="&mw;Accesibilidad"/>
+        <rdfs:label xml:lang="es">Enlaces con texto descriptivo</rdfs:label>
+    </owl:NamedIndividual>
+
+    <!-- El HTML valido beneficia a dos areas a la vez (individuo con dos tipos) -->
+    <owl:NamedIndividual rdf:about="&mw;PracticaHTMLValido">
+        <rdf:type rdf:resource="&mw;SEO"/>
+        <rdf:type rdf:resource="&mw;Accesibilidad"/>
+        <rdfs:label xml:lang="es">Código HTML valido</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;PracticaCargaRapida">
+        <rdf:type rdf:resource="&mw;Rendimiento"/>
+        <rdfs:label xml:lang="es">Tiempo de carga bajo</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;PracticaPaginaLiviana">
+        <rdf:type rdf:resource="&mw;Rendimiento"/>
+        <rdfs:label xml:lang="es">Página liviana</rdfs:label>
+    </owl:NamedIndividual>
+
+
+    <!-- ================================================================== -->
+    <!--  INDIVIDUOS: PROBLEMAS (con la metrica y el umbral para detectarlos) -->
+    <!-- ================================================================== -->
+
+    <owl:NamedIndividual rdf:about="&mw;ProblemaImagenesSinAlt">
+        <rdf:type rdf:resource="&mw;Problema"/>
+        <incumplePractica rdf:resource="&mw;PracticaTextoAlternativo"/>
+        <metrica>imagenes_sin_alt</metrica>
+        <umbral rdf:datatype="&xsd;decimal">0</umbral>
+        <unidad>imágenes</unidad>
+        <gravedad rdf:datatype="&xsd;integer">3</gravedad>
+        <rdfs:label xml:lang="es">Imágenes sin texto alternativo</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;ProblemaSinTitulo">
+        <rdf:type rdf:resource="&mw;Problema"/>
+        <incumplePractica rdf:resource="&mw;PracticaTituloDescriptivo"/>
+        <metrica>sin_titulo</metrica>
+        <umbral rdf:datatype="&xsd;decimal">0</umbral>
+        <gravedad rdf:datatype="&xsd;integer">3</gravedad>
+        <rdfs:label xml:lang="es">Página sin título</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;ProblemaSinMetaDescripcion">
+        <rdf:type rdf:resource="&mw;Problema"/>
+        <incumplePractica rdf:resource="&mw;PracticaMetaDescripcion"/>
+        <metrica>sin_meta_descripcion</metrica>
+        <umbral rdf:datatype="&xsd;decimal">0</umbral>
+        <gravedad rdf:datatype="&xsd;integer">2</gravedad>
+        <rdfs:label xml:lang="es">Página sin meta descripción</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;ProblemaEncabezadoIncorrecto">
+        <rdf:type rdf:resource="&mw;Problema"/>
+        <incumplePractica rdf:resource="&mw;PracticaEncabezadoPrincipal"/>
+        <metrica>h1_incorrecto</metrica>
+        <umbral rdf:datatype="&xsd;decimal">0</umbral>
+        <gravedad rdf:datatype="&xsd;integer">1</gravedad>
+        <rdfs:label xml:lang="es">Falta el encabezado h1 o hay varios</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;ProblemaSinIdioma">
+        <rdf:type rdf:resource="&mw;Problema"/>
+        <incumplePractica rdf:resource="&mw;PracticaIdiomaDeclarado"/>
+        <metrica>sin_idioma</metrica>
+        <umbral rdf:datatype="&xsd;decimal">0</umbral>
+        <gravedad rdf:datatype="&xsd;integer">2</gravedad>
+        <rdfs:label xml:lang="es">Idioma de la página no declarado</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;ProblemaEnlacesSinTexto">
+        <rdf:type rdf:resource="&mw;Problema"/>
+        <incumplePractica rdf:resource="&mw;PracticaEnlacesDescriptivos"/>
+        <metrica>enlaces_sin_texto</metrica>
+        <umbral rdf:datatype="&xsd;decimal">0</umbral>
+        <unidad>enlaces</unidad>
+        <gravedad rdf:datatype="&xsd;integer">2</gravedad>
+        <rdfs:label xml:lang="es">Enlaces sin texto</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;ProblemaErroresSintaxis">
+        <rdf:type rdf:resource="&mw;Problema"/>
+        <incumplePractica rdf:resource="&mw;PracticaHTMLValido"/>
+        <metrica>errores_sintaxis</metrica>
+        <umbral rdf:datatype="&xsd;decimal">5</umbral>
+        <unidad>errores</unidad>
+        <gravedad rdf:datatype="&xsd;integer">2</gravedad>
+        <rdfs:label xml:lang="es">Errores de sintaxis en el HTML</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;ProblemaCargaLenta">
+        <rdf:type rdf:resource="&mw;Problema"/>
+        <incumplePractica rdf:resource="&mw;PracticaCargaRapida"/>
+        <metrica>tiempo_carga</metrica>
+        <umbral rdf:datatype="&xsd;decimal">3</umbral>
+        <unidad>segundos</unidad>
+        <gravedad rdf:datatype="&xsd;integer">3</gravedad>
+        <rdfs:label xml:lang="es">El servidor tarda en responder</rdfs:label>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;ProblemaPaginaPesada">
+        <rdf:type rdf:resource="&mw;Problema"/>
+        <incumplePractica rdf:resource="&mw;PracticaPaginaLiviana"/>
+        <metrica>peso_html_kb</metrica>
+        <umbral rdf:datatype="&xsd;decimal">500</umbral>
+        <unidad>KB</unidad>
+        <gravedad rdf:datatype="&xsd;integer">1</gravedad>
+        <rdfs:label xml:lang="es">Página demasiado pesada</rdfs:label>
+    </owl:NamedIndividual>
+
+
+    <!-- ================================================================== -->
+    <!--  INDIVIDUOS: ACCIONES (soluciones)                                  -->
+    <!-- ================================================================== -->
+
+    <owl:NamedIndividual rdf:about="&mw;AccionAgregarTextoAlternativo">
+        <rdf:type rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">Agregar texto alternativo a las imágenes</rdfs:label>
+        <pasosSolucion xml:lang="es">A cada imagen agréguele una descripción corta de lo que muestra (atributo alt). Si la imagen es solo decorativa, deje la descripción vacia (alt="").</pasosSolucion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;AccionAgregarTitulo">
+        <rdf:type rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">Escribir un título para la página</rdfs:label>
+        <pasosSolucion xml:lang="es">Defina un título de 50 a 60 caracteres que diga de qué trata la página (etiqueta title). Es el texto que aparece en la pestaña del navegador y en Google.</pasosSolucion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;AccionAgregarMetaDescripcion">
+        <rdf:type rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">Escribir una meta descripción</rdfs:label>
+        <pasosSolucion xml:lang="es">Agregue un resumen de 120 a 160 caracteres de la página (meta name="description"). Google lo muestra debajo del título en los resultados.</pasosSolucion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;AccionCorregirEncabezado">
+        <rdf:type rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">Usar un solo encabezado principal</rdfs:label>
+        <pasosSolucion xml:lang="es">Deje un único encabezado h1 con el tema principal de la página y use h2, h3... para las secciones.</pasosSolucion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;AccionDeclararIdioma">
+        <rdf:type rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">Declarar el idioma de la página</rdfs:label>
+        <pasosSolucion xml:lang="es">Indique el idioma en la etiqueta principal, por ejemplo html lang="es" para español.</pasosSolucion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;AccionDescribirEnlaces">
+        <rdf:type rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">Poner texto a los enlaces</rdfs:label>
+        <pasosSolucion xml:lang="es">Cada enlace debe tener un texto que diga a dónde lleva. Si el enlace es un icono, agréguele una etiqueta (aria-label) con esa descripción.</pasosSolucion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;AccionValidarHTML">
+        <rdf:type rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">Corregir los errores del código HTML</rdfs:label>
+        <pasosSolucion xml:lang="es">Pase la página por el validador gratuito del W3C (validator.w3.org) y corrija las etiquetas mal cerradas, repetidas u obsoletas que reporte.</pasosSolucion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;AccionOptimizarCarga">
+        <rdf:type rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">Acelerar la respuesta del servidor</rdfs:label>
+        <pasosSolucion xml:lang="es">Active la caché y la compresión en el servidor, comprima las imágenes y considere un plan de hosting mejor o una red de distribución de contenido (CDN).</pasosSolucion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;AccionReducirPeso">
+        <rdf:type rdf:resource="&mw;Accion"/>
+        <rdfs:label xml:lang="es">Reducir el tamaño de la página</rdfs:label>
+        <pasosSolucion xml:lang="es">Elimine código y scripts que no se usan, minifique el HTML y mueva los estilos y scripts largos a archivos externos.</pasosSolucion>
+    </owl:NamedIndividual>
+
+
+    <!-- ================================================================== -->
+    <!--  INDIVIDUOS: RECOMENDACIONES (problema -> accion + explicacion)     -->
+    <!-- ================================================================== -->
+
+    <owl:NamedIndividual rdf:about="&mw;RecTextoAlternativo">
+        <rdf:type rdf:resource="&mw;Recomendacion"/>
+        <atiendeProblema rdf:resource="&mw;ProblemaImagenesSinAlt"/>
+        <sugiereAccion rdf:resource="&mw;AccionAgregarTextoAlternativo"/>
+        <aplicaPractica rdf:resource="&mw;PracticaTextoAlternativo"/>
+        <prioridad>Alta</prioridad>
+        <rdfs:label xml:lang="es">Describa sus imágenes</rdfs:label>
+        <explicacion xml:lang="es">Las personas ciegas usan programas que leen la pantalla en voz alta. Sin una descripción, esas imágenes son invisibles para ellas, y Google tampoco puede entender qué muestran.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;RecTitulo">
+        <rdf:type rdf:resource="&mw;Recomendacion"/>
+        <atiendeProblema rdf:resource="&mw;ProblemaSinTitulo"/>
+        <sugiereAccion rdf:resource="&mw;AccionAgregarTitulo"/>
+        <aplicaPractica rdf:resource="&mw;PracticaTituloDescriptivo"/>
+        <prioridad>Alta</prioridad>
+        <rdfs:label xml:lang="es">Ponga un título a la página</rdfs:label>
+        <explicacion xml:lang="es">El título es lo primero que ve la gente en Google. Sin él, su página aparece mal o no aparece en los resultados de búsqueda.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;RecMetaDescripcion">
+        <rdf:type rdf:resource="&mw;Recomendacion"/>
+        <atiendeProblema rdf:resource="&mw;ProblemaSinMetaDescripcion"/>
+        <sugiereAccion rdf:resource="&mw;AccionAgregarMetaDescripcion"/>
+        <aplicaPractica rdf:resource="&mw;PracticaMetaDescripcion"/>
+        <prioridad>Media</prioridad>
+        <rdfs:label xml:lang="es">Agregue una descripción para buscadores</rdfs:label>
+        <explicacion xml:lang="es">Sin descripción, Google elige un pedazo cualquiera de su página para mostrar. Una buena descripción hace que más personas den clic en su sitio.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;RecEncabezado">
+        <rdf:type rdf:resource="&mw;Recomendacion"/>
+        <atiendeProblema rdf:resource="&mw;ProblemaEncabezadoIncorrecto"/>
+        <sugiereAccion rdf:resource="&mw;AccionCorregirEncabezado"/>
+        <aplicaPractica rdf:resource="&mw;PracticaEncabezadoPrincipal"/>
+        <prioridad>Baja</prioridad>
+        <rdfs:label xml:lang="es">Ordene los encabezados</rdfs:label>
+        <explicacion xml:lang="es">El encabezado principal le dice a los buscadores cual es el tema de la página. Si falta o hay varios, el tema queda confuso.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;RecIdioma">
+        <rdf:type rdf:resource="&mw;Recomendacion"/>
+        <atiendeProblema rdf:resource="&mw;ProblemaSinIdioma"/>
+        <sugiereAccion rdf:resource="&mw;AccionDeclararIdioma"/>
+        <aplicaPractica rdf:resource="&mw;PracticaIdiomaDeclarado"/>
+        <prioridad>Media</prioridad>
+        <rdfs:label xml:lang="es">Indique el idioma de la página</rdfs:label>
+        <explicacion xml:lang="es">Los lectores de pantalla necesitan saber el idioma para pronunciar bien el texto. Sin él, pueden leer el español con acento inglés y no se entiende.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;RecEnlaces">
+        <rdf:type rdf:resource="&mw;Recomendacion"/>
+        <atiendeProblema rdf:resource="&mw;ProblemaEnlacesSinTexto"/>
+        <sugiereAccion rdf:resource="&mw;AccionDescribirEnlaces"/>
+        <aplicaPractica rdf:resource="&mw;PracticaEnlacesDescriptivos"/>
+        <prioridad>Media</prioridad>
+        <rdfs:label xml:lang="es">Ponga texto a los enlaces</rdfs:label>
+        <explicacion xml:lang="es">Un enlace sin texto se anuncia solo como "enlace" a quien usa lector de pantalla, que no sabe a dónde lo lleva.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;RecValidarHTML">
+        <rdf:type rdf:resource="&mw;Recomendacion"/>
+        <atiendeProblema rdf:resource="&mw;ProblemaErroresSintaxis"/>
+        <sugiereAccion rdf:resource="&mw;AccionValidarHTML"/>
+        <aplicaPractica rdf:resource="&mw;PracticaHTMLValido"/>
+        <prioridad>Media</prioridad>
+        <rdfs:label xml:lang="es">Corrija los errores del código</rdfs:label>
+        <explicacion xml:lang="es">Los errores en el código hacen que la página se vea distinta según el navegador y dificultan que buscadores y lectores de pantalla la interpreten.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;RecCargaRapida">
+        <rdf:type rdf:resource="&mw;Recomendacion"/>
+        <atiendeProblema rdf:resource="&mw;ProblemaCargaLenta"/>
+        <sugiereAccion rdf:resource="&mw;AccionOptimizarCarga"/>
+        <aplicaPractica rdf:resource="&mw;PracticaCargaRapida"/>
+        <prioridad>Alta</prioridad>
+        <rdfs:label xml:lang="es">Haga que su sitio cargue más rápido</rdfs:label>
+        <explicacion xml:lang="es">Más de la mitad de los visitantes abandona una página que tarda más de 3 segundos en cargar, y Google posiciona más abajo a los sitios lentos.</explicacion>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;RecReducirPeso">
+        <rdf:type rdf:resource="&mw;Recomendacion"/>
+        <atiendeProblema rdf:resource="&mw;ProblemaPaginaPesada"/>
+        <sugiereAccion rdf:resource="&mw;AccionReducirPeso"/>
+        <aplicaPractica rdf:resource="&mw;PracticaPaginaLiviana"/>
+        <prioridad>Baja</prioridad>
+        <rdfs:label xml:lang="es">Aligere su página</rdfs:label>
+        <explicacion xml:lang="es">Una página pesada gasta más datos móviles de sus visitantes y tarda más en abrir en celulares con mala señal.</explicacion>
+    </owl:NamedIndividual>
+
+
+    <!-- ================================================================== -->
+    <!--  EJEMPLO: un sitio analizado (para probar el razonador en Protege)  -->
+    <!-- ================================================================== -->
+
+    <owl:NamedIndividual rdf:about="&mw;SitioEjemplo">
+        <rdf:type rdf:resource="&mw;SitioWeb"/>
+        <url rdf:datatype="&xsd;anyURI">http://ejemplo.com</url>
+        <tieneEstado rdf:resource="&mw;Critico"/>
+        <presentaProblema rdf:resource="&mw;ProblemaImagenesSinAlt"/>
+        <presentaProblema rdf:resource="&mw;ProblemaCargaLenta"/>
+        <rdfs:label xml:lang="es">Sitio de ejemplo</rdfs:label>
+        <rdfs:comment xml:lang="es">Al ejecutar HermiT, el razonador infiere que es un SitioCritico y que incumple PracticaTextoAlternativo y PracticaCargaRapida (via sitioIncumplePractica).</rdfs:comment>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="&mw;InformeEjemplo">
+        <rdf:type rdf:resource="&mw;InformeAuditoria"/>
+        <analizaSitio rdf:resource="&mw;SitioEjemplo"/>
+        <tieneNivel rdf:resource="&mw;Urgente"/>
+        <incluyeRecomendacion rdf:resource="&mw;RecTextoAlternativo"/>
+        <incluyeRecomendacion rdf:resource="&mw;RecCargaRapida"/>
+        <rdfs:label xml:lang="es">Informe de ejemplo</rdfs:label>
+    </owl:NamedIndividual>
+
+</rdf:RDF>

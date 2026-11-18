@@ -1,0 +1,61 @@
+# Consultas SPARQL de ejemplo sobre mantenimiento_web.owl
+# Se pueden ejecutar en Protégé: Window > Tabs > SPARQL Query
+# (o desde Python con ontologia/consultas.py)
+
+PREFIX mw:   <http://www.semanticweb.org/sem-web-advisor/mantenimiento_web#>
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+
+# ---------------------------------------------------------------
+# 1. Jerarquía: subclases de BuenasPracticas y sus prácticas
+# ---------------------------------------------------------------
+SELECT ?area ?practica
+WHERE {
+    ?clase rdfs:subClassOf mw:BuenasPracticas ; rdfs:label ?area .
+    ?p a ?clase ; rdfs:label ?practica .
+}
+ORDER BY ?area
+
+# ---------------------------------------------------------------
+# 2. Cada problema con la recomendación y la acción que lo resuelve
+#    (la Recomendacion vincula un error con una solución)
+# ---------------------------------------------------------------
+SELECT ?problema ?recomendacion ?accion ?prioridad
+WHERE {
+    ?r a mw:Recomendacion ;
+       mw:atiendeProblema ?p ;
+       mw:sugiereAccion ?a ;
+       mw:prioridad ?prioridad ;
+       rdfs:label ?recomendacion .
+    ?p rdfs:label ?problema .
+    ?a rdfs:label ?accion .
+}
+
+# ---------------------------------------------------------------
+# 3. Problemas que se disparan con un tiempo de carga de 4.2 s
+# ---------------------------------------------------------------
+SELECT ?problema ?umbral
+WHERE {
+    ?p a mw:Problema ; mw:metrica "tiempo_carga" ; mw:umbral ?umbral ; rdfs:label ?problema .
+    FILTER (4.2 > ?umbral)
+}
+
+# ---------------------------------------------------------------
+# 4. Recomendaciones de Accesibilidad (por el tipo de la práctica)
+# ---------------------------------------------------------------
+SELECT ?recomendacion ?explicacion
+WHERE {
+    ?r mw:aplicaPractica ?pr ; rdfs:label ?recomendacion ; mw:explicacion ?explicacion .
+    ?pr a mw:Accesibilidad .
+}
+
+# ---------------------------------------------------------------
+# 5. Qué estado corresponde a cada nivel de mantenimiento difuso
+# ---------------------------------------------------------------
+SELECT ?nivel ?estado ?mensaje
+WHERE {
+    ?n a mw:NivelMantenimiento ; rdfs:label ?nivel ; mw:mensaje ?mensaje ;
+       mw:correspondeAEstado ?e .
+    ?e rdfs:label ?estado .
+}
