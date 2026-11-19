@@ -73,8 +73,8 @@ class AgenteInterfaz(Agent):
         t.set_metadata("ontology", ONTOLOGIA)
         self.add_behaviour(self.RecibirRespuestas(), t)
 
-    async def solicitar(self, url: str, timeout: float = 60) -> dict:
-        conversacion = str(uuid.uuid4())
+    async def solicitar(self, url: str, timeout: float = 60, conversacion: str | None = None) -> dict:
+        conversacion = conversacion or str(uuid.uuid4())
         futuro = asyncio.get_running_loop().create_future()
         self.pendientes[conversacion] = futuro
         self.add_behaviour(self.EnviarSolicitud(url, conversacion))
@@ -100,9 +100,9 @@ class SistemaMultiagente:
         for agente in self._agentes:
             await agente.start(auto_register=True)
 
-    async def analizar(self, url: str, timeout: float = 60) -> dict:
+    async def analizar(self, url: str, timeout: float = 60, conversacion: str | None = None) -> dict:
         """Envía la URL al sistema y espera el informe final del Notificador."""
-        return await self.interfaz.solicitar(url, timeout)
+        return await self.interfaz.solicitar(url, timeout, conversacion)
 
     async def detener(self):
         for agente in reversed(self._agentes):

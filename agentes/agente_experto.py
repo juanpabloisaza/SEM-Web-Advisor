@@ -43,9 +43,10 @@ def diagnosticar(metricas: dict) -> dict:
     altas = [r["titulo"] for r in recomendaciones if r["prioridad"] == "Alta"]
     if altas and ORDEN_NIVELES.index(nivel) < ORDEN_NIVELES.index("Preventivo"):
         nivel = "Preventivo"
-        ajuste = (f"La lógica difusa indicó «{difuso['nivel']}» por velocidad y errores, pero la "
-                  f"ontología detectó {len(altas)} problema(s) de prioridad Alta "
-                  f"({'; '.join(altas)}), así que el nivel sube a «Preventivo».")
+        cuantos = "un problema" if len(altas) == 1 else f"{len(altas)} problemas"
+        ajuste = (f"Por velocidad y errores de código la lógica difusa indicó «{difuso['nivel']}», pero la "
+                  f"ontología detectó {cuantos} de prioridad Alta ({'; '.join(altas)}). "
+                  f"Por eso el nivel sube a «Preventivo».")
 
     # (4) Ontología: nivel -> estado del sitio + mensaje para el usuario
     interpretacion = interpretar_nivel(nivel)

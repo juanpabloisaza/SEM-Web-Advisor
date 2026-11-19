@@ -22,11 +22,12 @@ from spade.behaviour import CyclicBehaviour
 from agentes.mensajes import crear_mensaje, enviar, leer, plantilla
 
 
-def estructurar_informe(metricas: dict, diagnostico: dict) -> dict:
+def estructurar_informe(metricas: dict, diagnostico: dict, conversacion: str | None = None) -> dict:
     return {
         "id": str(uuid.uuid4()),
         "fecha": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "sitio": metricas["url"],
+        "conversacion": conversacion,  # thread ACL que produjo este informe
         "metricas": metricas,
         "diagnostico": diagnostico,
     }
@@ -53,7 +54,7 @@ class AgenteNotificador(Agent):
             if not msg:
                 return
             datos = leer(msg)
-            informe = estructurar_informe(datos["metricas"], datos["diagnostico"])
+            informe = estructurar_informe(datos["metricas"], datos["diagnostico"], msg.thread)
             try:
                 id_guardado = await asyncio.to_thread(self.agent.guardar, informe)
             except Exception as e:  # p. ej. MongoDB apagado
