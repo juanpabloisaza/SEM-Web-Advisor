@@ -58,7 +58,21 @@ pip install -r requirements.txt
 
 ## Ejecución
 
-_Se completará a medida que avancen las fases._
+Con MongoDB corriendo y el entorno virtual activado:
+
+```bash
+python -m web.app
+```
+
+Abrir **http://127.0.0.1:5000**, escribir la dirección de un sitio y pulsar **Analizar**.
+
+Otros comandos útiles:
+
+```bash
+python -m agentes.sistema https://example.com   # análisis por consola, con la conversación ACL
+python -m persistencia.repositorio              # informes guardados + consulta SPARQL
+python -m unittest discover tests               # 29 pruebas (cerrar antes el dashboard)
+```
 
 ## Integrantes
 

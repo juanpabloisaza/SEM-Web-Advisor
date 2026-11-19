@@ -56,12 +56,66 @@ class RepositorioInformes:
     def contar(self) -> int:
         return self.col.count_documents({})
 
+    def agregar_conversacion(self, id_informe: str, mensajes: list[dict]):
+        """Adjunta al informe los mensajes ACL que lo produjeron (para verlos en el historial)."""
+        self.col.update_one({"_id": id_informe}, {"$set": {"detail.mensajes_acl": mensajes}})
+
     def estadisticas(self) -> dict:
         """Cantidad de informes por nivel (para el Dashboard)."""
         return {d["_id"]: d["n"] for d in self.col.aggregate([{"$group": {"_id": "$level", "n": {"$sum": 1}}}])}
 
     def grafo(self, limite: int = 1000):
         """Une todos los informes en un solo grafo RDF (para consultarlos con SPARQL)."""
+        from rdflib import Graph
+
+        g = Graph()
+        for doc in self.listar(limite):
+            g += a_grafo(doc)
+        return g
+
+
+class RepositorioMemoria:
+    """Misma interfaz que RepositorioInformes, sin base de datos (si MongoDB no está corriendo)."""
+
+    def __init__(self):
+        self.docs: dict[str, dict] = {}
+        self.col = type("Col", (), {"full_name": "memoria"})()
+
+    def verificar_conexion(self) -> str:
+        return "memoria"
+
+    def crear_indices(self):
+        pass
+
+    def guardar(self, informe: dict) -> str:
+        doc = construir_jsonld(informe)
+        doc["_id"] = informe["id"]
+        self.docs[informe["id"]] = doc
+        return informe["id"]
+
+    def obtener(self, id_informe):
+        return self.docs.get(id_informe)
+
+    def listar(self, limite=20, sitio=None):
+        docs = sorted(self.docs.values(), key=lambda d: d["dateCreated"], reverse=True)
+        if sitio:
+            docs = [d for d in docs if sitio.lower() in d["site"]["@id"].lower()]
+        return docs[:limite]
+
+    def contar(self):
+        return len(self.docs)
+
+    def agregar_conversacion(self, id_informe, mensajes):
+        if id_informe in self.docs:
+            self.docs[id_informe]["detail"]["mensajes_acl"] = mensajes
+
+    def estadisticas(self):
+        res: dict[str, int] = {}
+        for d in self.docs.values():
+            res[d["level"]] = res.get(d["level"], 0) + 1
+        return res
+
+    def grafo(self, limite=1000):
         from rdflib import Graph
 
         g = Graph()

@@ -669,7 +669,7 @@
     <owl:NamedIndividual rdf:about="&mw;AccionAgregarTextoAlternativo">
         <rdf:type rdf:resource="&mw;Accion"/>
         <rdfs:label xml:lang="es">Agregar texto alternativo a las imágenes</rdfs:label>
-        <pasosSolucion xml:lang="es">A cada imagen agréguele una descripción corta de lo que muestra (atributo alt). Si la imagen es solo decorativa, deje la descripción vacia (alt="").</pasosSolucion>
+        <pasosSolucion xml:lang="es">A cada imagen agréguele una descripción corta de lo que muestra (atributo alt). Si la imagen es solo decorativa, deje la descripción vacía (alt="").</pasosSolucion>
     </owl:NamedIndividual>
 
     <owl:NamedIndividual rdf:about="&mw;AccionAgregarTitulo">
@@ -762,7 +762,7 @@
         <aplicaPractica rdf:resource="&mw;PracticaEncabezadoPrincipal"/>
         <prioridad>Baja</prioridad>
         <rdfs:label xml:lang="es">Ordene los encabezados</rdfs:label>
-        <explicacion xml:lang="es">El encabezado principal le dice a los buscadores cual es el tema de la página. Si falta o hay varios, el tema queda confuso.</explicacion>
+        <explicacion xml:lang="es">El encabezado principal le dice a los buscadores cuál es el tema de la página. Si falta o hay varios, el tema queda confuso.</explicacion>
     </owl:NamedIndividual>
 
     <owl:NamedIndividual rdf:about="&mw;RecIdioma">

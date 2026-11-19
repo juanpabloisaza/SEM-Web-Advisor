@@ -21,5 +21,9 @@ desktop.ini
 # Protégé
 catalog-v001.xml
 
+# Node / React (web/frontend/dist SÍ se versiona para poder usar la app sin Node)
+node_modules/
+.claude/
+
 # Salidas temporales
 *.log

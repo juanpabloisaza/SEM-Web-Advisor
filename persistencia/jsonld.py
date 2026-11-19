@@ -87,7 +87,7 @@ def construir_jsonld(informe: dict) -> dict:
         "recommendations": [f"mw:{r['recomendacion']}" for r in d["recomendaciones"]],
         "description": d["mensaje"],
         # Todo el detalle técnico se conserva para el Dashboard como literal rdf:JSON
-        "detail": {"metricas": m, "diagnostico": d},
+        "detail": {"metricas": m, "diagnostico": d, "conversacion": informe.get("conversacion")},
     }
 
 
