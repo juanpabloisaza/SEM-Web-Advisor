@@ -1,0 +1,189 @@
+{
+  "@context": {
+    "@vocab": "http://schema.org/",
+    "mw": "http://www.semanticweb.org/sem-web-advisor/mantenimiento_web#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "_id": null,
+    "site": {
+      "@id": "mw:analizaSitio",
+      "@type": "@id"
+    },
+    "level": {
+      "@id": "mw:tieneNivel",
+      "@type": "@id"
+    },
+    "fuzzyLevel": {
+      "@id": "mw:tieneNivelDifuso",
+      "@type": "@id"
+    },
+    "score": {
+      "@id": "mw:puntajeDifuso",
+      "@type": "xsd:decimal"
+    },
+    "recommendations": {
+      "@id": "mw:incluyeRecomendacion",
+      "@type": "@id"
+    },
+    "detail": {
+      "@id": "mw:detalle",
+      "@type": "@json"
+    },
+    "dateCreated": {
+      "@id": "dateCreated",
+      "@type": "xsd:dateTime"
+    },
+    "result": "mw:resultado",
+    "status": {
+      "@id": "mw:estadoTexto"
+    },
+    "priority": "mw:prioridad",
+    "tags": "keywords",
+    "state": {
+      "@id": "mw:tieneEstado",
+      "@type": "@id"
+    },
+    "problems": {
+      "@id": "mw:presentaProblema",
+      "@type": "@id"
+    },
+    "url": {
+      "@id": "url",
+      "@type": "@id"
+    }
+  },
+  "@id": "urn:uuid:1dc2ea9a-c14d-4644-8cd0-cf46fb4951bb",
+  "@type": [
+    "Report",
+    "mw:InformeAuditoria"
+  ],
+  "name": "Informe de mantenimiento de https://www.politecnicojic.edu.co",
+  "dateCreated": "2026-11-18T23:56:11+00:00",
+  "creator": {
+    "@type": "SoftwareApplication",
+    "name": "SEM-Web-Advisor"
+  },
+  "site": {
+    "@id": "https://www.politecnicojic.edu.co/",
+    "@type": [
+      "WebSite",
+      "mw:SitioWeb"
+    ],
+    "url": "https://www.politecnicojic.edu.co/",
+    "state": "mw:Aceptable",
+    "problems": [
+      "mw:ProblemaImagenesSinAlt",
+      "mw:ProblemaEncabezadoIncorrecto"
+    ]
+  },
+  "result": {
+    "status": "Necesita mantenimiento preventivo",
+    "priority": "Media",
+    "tags": [
+      "Accesibilidad",
+      "SEO"
+    ]
+  },
+  "level": "mw:Preventivo",
+  "fuzzyLevel": "mw:AlDia",
+  "score": 15.6,
+  "recommendations": [
+    "mw:RecTextoAlternativo",
+    "mw:RecEncabezado"
+  ],
+  "description": "Su sitio está funcionando, pero conviene hacer un mantenimiento preventivo para evitar problemas a futuro.",
+  "detail": {
+    "metricas": {
+      "url": "https://www.politecnicojic.edu.co",
+      "url_final": "https://www.politecnicojic.edu.co/",
+      "codigo_http": 200,
+      "tiempo_carga": 0.89,
+      "peso_html_kb": 79.5,
+      "errores_sintaxis": 3,
+      "imagenes_sin_alt": 1,
+      "total_imagenes": 111,
+      "enlaces_sin_texto": 0,
+      "total_enlaces": 254,
+      "sin_titulo": 0,
+      "sin_meta_descripcion": 0,
+      "sin_idioma": 0,
+      "h1_incorrecto": 1,
+      "total_h1": 0
+    },
+    "diagnostico": {
+      "nivel": "Preventivo",
+      "nivel_difuso": "Al día",
+      "ajuste_semantico": "La lógica difusa indicó «Al día» por velocidad y errores, pero la ontología detectó 1 problema(s) de prioridad Alta (Describa sus imágenes), así que el nivel sube a «Preventivo».",
+      "puntaje": 15.6,
+      "explicacion_difusa": "Tiempo de carga 0.89 s = Rápido (100%); 3 errores = Pocos (100%). Necesidad de mantenimiento: 15.6/100 -> Al día.",
+      "reglas_activadas": [
+        {
+          "regla": "R1",
+          "texto": "SI el tiempo es Rápido Y los errores son Pocos ENTONCES el mantenimiento es Al día",
+          "fuerza": 1.0,
+          "justificacion": "Carga rápido y el código está limpio: solo requiere revisiones periódicas."
+        }
+      ],
+      "pertenencias": {
+        "tiempo_carga": {
+          "Rápido": 1.0,
+          "Moderado": 0.0,
+          "Lento": 0.0
+        },
+        "errores_sintaxis": {
+          "Pocos": 1.0,
+          "Muchos": 0.0
+        },
+        "mantenimiento": {
+          "Al día": 1.0,
+          "Preventivo": 0.0,
+          "Urgente": 0.0
+        }
+      },
+      "estado": "Aceptable",
+      "mensaje": "Su sitio está funcionando, pero conviene hacer un mantenimiento preventivo para evitar problemas a futuro.",
+      "explicacion_estado": "El sitio funciona, pero tiene detalles que conviene mejorar para que no se conviertan en problemas mayores.",
+      "areas_afectadas": [
+        "Accesibilidad",
+        "SEO"
+      ],
+      "recomendaciones": [
+        {
+          "problema": "ProblemaImagenesSinAlt",
+          "nombre": "Imágenes sin texto alternativo",
+          "metrica": "imagenes_sin_alt",
+          "umbral": 0.0,
+          "unidad": "imágenes",
+          "gravedad": 3,
+          "areas": [
+            "Accesibilidad"
+          ],
+          "recomendacion": "RecTextoAlternativo",
+          "titulo": "Describa sus imágenes",
+          "prioridad": "Alta",
+          "explicacion": "Las personas ciegas usan programas que leen la pantalla en voz alta. Sin una descripción, esas imágenes son invisibles para ellas, y Google tampoco puede entender qué muestran.",
+          "accion": "Agregar texto alternativo a las imágenes",
+          "pasos": "A cada imagen agréguele una descripción corta de lo que muestra (atributo alt). Si la imagen es solo decorativa, deje la descripción vacia (alt=\"\").",
+          "valor": 1
+        },
+        {
+          "problema": "ProblemaEncabezadoIncorrecto",
+          "nombre": "Falta el encabezado h1 o hay varios",
+          "metrica": "h1_incorrecto",
+          "umbral": 0.0,
+          "unidad": "",
+          "gravedad": 1,
+          "areas": [
+            "SEO"
+          ],
+          "recomendacion": "RecEncabezado",
+          "titulo": "Ordene los encabezados",
+          "prioridad": "Baja",
+          "explicacion": "El encabezado principal le dice a los buscadores cual es el tema de la página. Si falta o hay varios, el tema queda confuso.",
+          "accion": "Usar un solo encabezado principal",
+          "pasos": "Deje un único encabezado h1 con el tema principal de la página y use h2, h3... para las secciones.",
+          "valor": 1
+        }
+      ]
+    }
+  }
+}
